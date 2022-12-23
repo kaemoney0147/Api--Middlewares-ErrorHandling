@@ -1,7 +1,9 @@
-import bookRouter from "./Api/books/index.js";
+import bookRouter from "./Api/blogs/index.js";
 import express from "express";
 import listEndpoints from "express-list-endpoints";
 import cors from "cors";
+import filesRouter from "./Api/files/index.js";
+import { join } from "path";
 import {
   genericErrorHandler,
   notFoundHandler,
@@ -11,6 +13,7 @@ import {
 
 const server = express();
 const port = 3001;
+const publicFolderPath = join(process.cwd(), "./public");
 
 const middLeware = (request, respose, next) => {
   console.log(
@@ -18,17 +21,18 @@ const middLeware = (request, respose, next) => {
   );
   next();
 };
-
+server.use(express.static(publicFolderPath));
 server.use(cors());
 server.use(middLeware);
 server.use(express.json());
-
+/// endpoints
 server.use("/blogpost", middLeware, bookRouter);
+server.use("/blogpost", middLeware, filesRouter);
 
-server.use(badRequestHandler); // 400
-server.use(unauthorizedHandler); // 401
-server.use(notFoundHandler); // 404
-server.use(genericErrorHandler); // 500
+server.use(badRequestHandler);
+server.use(unauthorizedHandler);
+server.use(notFoundHandler);
+server.use(genericErrorHandler);
 
 server.listen(port, () => {
   console.table(listEndpoints(server));

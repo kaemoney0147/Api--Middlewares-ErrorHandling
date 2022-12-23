@@ -25,7 +25,6 @@ export const notFoundHandler = (err, req, res, next) => {
 };
 
 export const genericErrorHandler = (err, req, res, next) => {
-  // 500
   console.log("ERROR RECEIVED FROM UP ABOVE:", err);
   res
     .status(500)
