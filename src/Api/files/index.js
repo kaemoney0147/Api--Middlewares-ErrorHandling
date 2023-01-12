@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
-import { extname } from "path";
+import { pipeline } from "stream";
+import { getPDFReadableStream } from "../../lib/pdf-tools.js";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { getBlog, writeBlogs, saveCoverImages } from "../../lib/fs-tools.js";
@@ -10,7 +11,7 @@ const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
     cloudinary, // cloudinary is going to search in .env vars for smt called process.env.CLOUDINARY_URL
     params: {
-      folder: "fs0422/users",
+      folder: "BlogMartket",
     },
   }),
 }).single("cover");
@@ -47,5 +48,28 @@ filesRouter.post(
     }
   }
 );
+
+filesRouter.get("/:id/pdf", async (req, res, next) => {
+  res.setHeader("Content-Disposition", "attachment; filename=blog.pdf");
+
+  const { id } = req.params;
+  const posts = await getBlog();
+  console.log("this is pdf", posts);
+
+  const postSelected = posts.find((post) => post.id === id);
+  console.log("selectedPost", postSelected);
+  if (postSelected !== null) {
+    res.setHeader("Content-Disposition", "attachment; blog.pdf");
+    const source = getPDFReadableStream(postSelected);
+    // console.log("source", source);
+    const destination = res;
+
+    pipeline(source, destination, (err) => {
+      if (err) console.log(err);
+    });
+  } else {
+    console.log(`There is no blog post with this id: ${id}`);
+  }
+});
 
 export default filesRouter;
