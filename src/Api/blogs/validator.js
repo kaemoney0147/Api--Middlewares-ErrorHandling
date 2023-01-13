@@ -1,7 +1,7 @@
 import { checkSchema, validationResult } from "express-validator";
 import createHttpError from "http-errors";
 
-const bookSchema = {
+const blogSchema = {
   title: {
     in: ["body"],
     isString: {
@@ -23,7 +23,7 @@ const bookSchema = {
   },
 };
 
-export const checksBooksSchema = checkSchema(bookSchema);
+export const checksBooksSchema = checkSchema(blogSchema);
 
 export const triggerBadRequest = (req, res, next) => {
   const errors = validationResult(req);
@@ -32,7 +32,7 @@ export const triggerBadRequest = (req, res, next) => {
 
   if (!errors.isEmpty()) {
     next(
-      createHttpError(400, "Errors during book validation", {
+      createHttpError(400, "Errors during blog validation", {
         errorsList: errors.array(),
       })
     );

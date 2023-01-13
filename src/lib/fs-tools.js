@@ -16,3 +16,8 @@ export const writeBlogs = (arryOfBlofs) => writeJSON(blogJsonPath, arryOfBlofs);
 
 export const saveCoverImages = (fileName, contentAsABuffer) =>
   writeFile(join(publicFolderPath, fileName), contentAsABuffer);
+
+export const getBlogPostsJsonReadableStream = () =>
+  createReadStream(blogJsonPath);
+export const getPDFWritableStream = (filename) =>
+  createWriteStream(join(dataFolderPath, filename));

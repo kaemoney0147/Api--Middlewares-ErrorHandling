@@ -3,13 +3,14 @@ import uniqid from "uniqid";
 import httpErrors from "http-errors";
 import { getBlog, writeBlogs } from "../../lib/fs-tools.js";
 import { checksBooksSchema, triggerBadRequest } from "./validator.js";
+import { sendRegistrationEmail } from "../../lib/email-tools.js";
 
 const bookRouter = express.Router();
 const { NotFound, Unauthorized, BadRequest } = httpErrors;
 
 bookRouter.post(
   "/",
-  checksBooksSchema,
+  // checksBooksSchema,
   triggerBadRequest,
   async (request, response, next) => {
     try {
@@ -25,8 +26,10 @@ bookRouter.post(
       const arryOfBlofs = await getBlog();
       arryOfBlofs.push(newBlogs);
       writeBlogs(arryOfBlofs);
+      sendRegistrationEmail(request.body.author.email);
       response.status(201).send({ id: newBlogs.id });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

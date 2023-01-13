@@ -4,7 +4,13 @@ import { pipeline } from "stream";
 import { getPDFReadableStream } from "../../lib/pdf-tools.js";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { getBlog, writeBlogs, saveCoverImages } from "../../lib/fs-tools.js";
+import {
+  getBlog,
+  writeBlogs,
+  saveCoverImages,
+  getBlogPostsJsonReadableStream,
+} from "../../lib/fs-tools.js";
+import json2csv from "json2csv";
 
 const filesRouter = express.Router();
 const cloudinaryUploader = multer({
@@ -69,6 +75,22 @@ filesRouter.get("/:id/pdf", async (req, res, next) => {
     });
   } else {
     console.log(`There is no blog post with this id: ${id}`);
+  }
+});
+
+filesRouter.get("/blogPostCSV", (req, res, next) => {
+  try {
+    res.setHeader("Content-Disposition", "attachment; filename=blogPosts.csv");
+    const source = getBlogPostsJsonReadableStream();
+    const transform = new json2csv.Transform({
+      fields: ["title", "category", "id"],
+    });
+    const destination = res;
+    pipeline(source, transform, destination, (err) => {
+      if (err) console.log(err);
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
